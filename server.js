@@ -5,15 +5,31 @@ const app = express();
 
 app.use(express.json());
 
-// ✅ Enable CORS for all routes
 app.use(cors({
-  origin: "http://localhost:3000" // allow your React app
+  origin: "http://localhost:3000" 
 }));
 
+// Routes
+const authRoutes = require('./routes/auth');
+const staffRoutes = require('./routes/staff');
 const userRoutes = require('./routes/user');
+const employerRoutes = require('./routes/employer');
 
+app.use('/auth', authRoutes);
+app.use('/staffs', staffRoutes);
 app.use('/users', userRoutes);
+app.use('/employers', employerRoutes);
 
+// Global error handling
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal Server Error',
+  });
+});
+
+// Start server
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
