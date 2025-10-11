@@ -11,14 +11,17 @@ app.use(cors({
 
 // Routes
 const authRoutes = require('./routes/auth');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 const staffRoutes = require('./routes/staff');
 const userRoutes = require('./routes/user');
 const employerRoutes = require('./routes/employer');
 
 app.use('/auth', authRoutes);
+app.use('/dashboard', dashboardRoutes);
 app.use('/staffs', staffRoutes);
 app.use('/users', userRoutes);
 app.use('/employers', employerRoutes);
+
 
 // Global error handling
 app.use((err, req, res, next) => {

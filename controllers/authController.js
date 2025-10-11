@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { runQuery, sendSuccess, sendError } = require("../customHelper");
+const { sendError, sendSuccess, runQuery } = require("../utility/customHelper");
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_here";
 
@@ -89,6 +89,7 @@ exports.deleteAnonymousUsers = async (req, res) => {
 
 exports.authUser = async (req, res) => {
   const { email, password } = req.body;
+  console.log("req.body", req.body)
 
   if (!email || !password) {
     return sendError(res, "Email and password are required", 400);

@@ -1,9 +1,9 @@
-const db = require('./db'); // your db connection file
+const dbConnection = require("./utility/dbConnection");
 
 // Generic query helper with Promise
 const runQuery = (query, params = []) => {
   return new Promise((resolve, reject) => {
-    db.query(query, params, (err, result) => {
+    dbConnection.query(query, params, (err, result) => {
       if (err) {
         reject(err); // Pass error to catch()
       } else {
