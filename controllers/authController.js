@@ -105,7 +105,7 @@ exports.authUser = async (req, res) => {
     );
 
     if (results.length === 0) {
-      return sendError(res, "Invalid email or password", 401);
+      return sendError(res, "Invalid email or password, user not found", 401);
     }
 
     const user = results[0];
