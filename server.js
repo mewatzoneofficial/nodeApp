@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const cors = require("cors"); // ✅ imported cors
+const cors = require("cors");
 const app = express();
 
 app.use(express.json());
@@ -15,15 +15,15 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const staffRoutes = require('./routes/staff');
 const userRoutes = require('./routes/user');
 const employerRoutes = require('./routes/employer');
+const jobRoutes = require('./routes/jobRoutes');
 
 app.use('/auth', authRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/staffs', staffRoutes);
 app.use('/users', userRoutes);
 app.use('/employers', employerRoutes);
+app.use('/job', jobRoutes);
 
-
-// Global error handling
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.status || 500).json({
