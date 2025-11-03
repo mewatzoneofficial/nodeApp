@@ -29,3 +29,9 @@ export function sendError(res, message = "Server Error", status = 500) {
     message,
   });
 }
+
+export default {
+  runQuery,
+  sendSuccess,
+  sendError,
+};
