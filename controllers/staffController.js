@@ -1,28 +1,35 @@
 import bcrypt from "bcryptjs";
-import { runQuery, sendSuccess, sendError } from "../customHelper.js";
+import customHelper from "../customHelper.js";
+const { runQuery, sendError, sendSuccess } = customHelper;
 
-// Get all admins with pagination and search
 export const getAll = async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const offset = (page - 1) * limit;
+    const { name, email, mobile } = req.query;
 
-    const { name, email } = req.query;
+    const trimmedName = name?.trim();
+    const trimmedEmail = email?.trim();
+    const trimmedMobile = mobile?.trim();
 
     let whereClause = "WHERE 1=1";
     const params = [];
 
-    if (name) {
+    if (trimmedName) {
       whereClause += " AND name LIKE ?";
-      params.push(`%${name}%`);
+      params.push(`%${trimmedName}%`);
     }
 
-    if (email) {
+    if (trimmedEmail) {
       whereClause += " AND (email LIKE ? OR official_email LIKE ?)";
-      params.push(`%${email}%`, `%${email}%`);
+      params.push(`%${trimmedEmail}%`, `%${trimmedEmail}%`);
     }
 
+    if (trimmedMobile) {
+      whereClause += " AND (mobile LIKE ? OR official_mobile LIKE ?)";
+      params.push(`%${trimmedMobile}%`, `%${trimmedMobile}%`);
+    }
     const sql = `
       SELECT adminID, name, mobile, email, official_email, official_mobile, image, dob, joining_date,
              gender, created_at
@@ -67,7 +74,6 @@ export const getById = async (req, res) => {
   }
 };
 
-// Create a new admin
 export const createRecord = async (req, res) => {
   const { name, mobile, email, official_email, official_mobile, password, dob, joining_date, gender } = req.body;
 
@@ -76,7 +82,10 @@ export const createRecord = async (req, res) => {
   }
 
   try {
-    const existing = await runQuery("SELECT adminID FROM admin WHERE email = ? OR mobile = ?", [email, mobile]);
+    const existing = await runQuery(
+      "SELECT adminID FROM admin WHERE email = ? OR mobile = ?", 
+      [email, mobile]
+    );
     if (existing.length) return sendError(res, "Email or mobile already exists", 400);
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -88,16 +97,13 @@ export const createRecord = async (req, res) => {
       [name, email, mobile, hashedPassword, official_email || null, official_mobile || null, dob || null, joining_date || null, gender || null]
     );
 
-    return sendSuccess(
-      res,
-      { id: result.insertId, name, email, mobile, official_email, official_mobile, dob, joining_date, gender },
-      201
-    );
+    return sendSuccess(res, result, "Admin created successfully", 201);
   } catch (err) {
     console.error("Error creating admin:", err);
-    return sendError(res, "Server error: " + err.message, 500);
+    return sendError(res, "Error creating admin", 500);
   }
 };
+
 
 // Update admin by ID
 export const updateRecord = async (req, res) => {

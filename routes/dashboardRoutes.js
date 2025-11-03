@@ -1,17 +1,21 @@
-const express = require('express');
-const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-
-const {
+import express from 'express';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import {
   authProfile,
   updateProfile,
   userChart,
   jobChart,
   employerJobChart
-} = require('../controllers/dashboardController');
+} from '../controllers/dashboardController.js';
 
+const router = express.Router();
+
+// Get __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Ensure uploads folder exists
 const uploadDir = path.join(__dirname, '..', 'uploads');
@@ -41,11 +45,11 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ storage, fileFilter });
 
-
+// Routes
 router.get('/profile/:id', authProfile);
 router.put('/profile/:id', upload.single('image'), updateProfile);
 router.get('/user-chart', userChart);
 router.get('/job-chart', jobChart);
 router.get('/employer-job-chart', employerJobChart);
 
-module.exports = router;  
+export default router;

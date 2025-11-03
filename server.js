@@ -1,22 +1,24 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require("cors");
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+
+// Import routes
+import authRoutes from './routes/auth.js';
+import dashboardRoutes from './routes/dashboardRoutes.js';
+import staffRoutes from './routes/staff.js';
+import userRoutes from './routes/user.js';
+import employerRoutes from './routes/employer.js';
+import jobRoutes from './routes/jobRoutes.js';
+
 const app = express();
 
 app.use(express.json());
 
 app.use(cors({
-  origin: "http://localhost:3000" 
+  origin: "http://localhost:3000"
 }));
 
 // Routes
-const authRoutes = require('./routes/auth');
-const dashboardRoutes = require('./routes/dashboardRoutes');
-const staffRoutes = require('./routes/staff');
-const userRoutes = require('./routes/user');
-const employerRoutes = require('./routes/employer');
-const jobRoutes = require('./routes/jobRoutes');
-
 app.use('/auth', authRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/staffs', staffRoutes);
@@ -24,6 +26,7 @@ app.use('/users', userRoutes);
 app.use('/employers', employerRoutes);
 app.use('/job', jobRoutes);
 
+// Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.status || 500).json({

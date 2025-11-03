@@ -1,13 +1,8 @@
-const express = require('express');
+import express from 'express';
+import { authUser } from '../controllers/authController.js';
+
 const router = express.Router();
-const {
-  authUser,
-  deleteAnonymousUser,
-  deleteAnonymousUsers,
-} = require('../controllers/authController');
 
 router.post('/login', authUser);
-router.get('/deleteAnonymousUser', deleteAnonymousUser);
-router.get('/deleteAnonymousUsers', deleteAnonymousUsers);
 
-module.exports = router;
+export default router;

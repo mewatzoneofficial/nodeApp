@@ -1,11 +1,13 @@
-const dbConnection = require("./utility/dbConnection");
+// Ensure correct relative path to dbConnection.js
+import dbConnection from './dbConnection.js';
 
-// Generic query helper with Promise
-const runQuery = (query, params = []) => {
+export const runQuery = (query, params = []) => {
+  if (!Array.isArray(params)) params = [params];
   return new Promise((resolve, reject) => {
     dbConnection.query(query, params, (err, result) => {
       if (err) {
-        reject(err); // Pass error to catch()
+        console.error("DB Query Error:", err);
+        reject(err);
       } else {
         resolve(result);
       }
@@ -13,20 +15,17 @@ const runQuery = (query, params = []) => {
   });
 };
 
-// Success response
-const sendSuccess = (res, data, status = 200) => {
+export function sendSuccess(res, data, message = "Success", status = 200) {
   res.status(status).json({
     success: true,
+    message,
     data,
   });
-};
+}
 
-// Error response
-const sendError = (res, message, status = 500) => {
+export function sendError(res, message = "Server Error", status = 500) {
   res.status(status).json({
     success: false,
     message,
   });
-};
-
-module.exports = { runQuery, sendSuccess, sendError };
+}

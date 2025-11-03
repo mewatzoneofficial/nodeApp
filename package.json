@@ -1,6 +1,7 @@
 {
   "name": "tallentonode",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
@@ -24,6 +25,8 @@
     "ws": "^8.18.3"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.4",
     "nodemon": "^3.1.10"
   }
 }

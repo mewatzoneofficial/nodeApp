@@ -1,6 +1,10 @@
-const { runQuery, sendError, sendSuccess } = require("../utility/customHelper");
+import fs from "fs";
+import path from "path";
+import customHelper from "../customHelper.js"; // default export
+const { runQuery, sendError, sendSuccess } = customHelper;
 
-exports.authProfile = async (req, res) => {
+// Get admin profile by ID
+export const authProfile = async (req, res) => {
   const adminID = req.params.id;
   try {
     const results = await runQuery("SELECT * FROM admin WHERE adminID = ?", [
@@ -15,8 +19,8 @@ exports.authProfile = async (req, res) => {
   }
 };
 
-// Update admin by ID (with optional image)
-exports.updateProfile = async (req, res) => {
+// Update admin profile by ID (with optional image)
+export const updateProfile = async (req, res) => {
   const { id } = req.params;
   const {
     name,
@@ -109,14 +113,14 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-exports.userChart = async (req, res) => {
+// User chart data
+export const userChart = async (req, res) => {
   try {
     const results = await runQuery(`
       SELECT 
         (SELECT COUNT(*) FROM faculity_users) AS total_faculity_users,
         (SELECT COUNT(*) FROM faculity_users WHERE DATE(created_at) = CURRENT_DATE) AS total_today_faculty_users,
-        (SELECT COUNT(*) FROM faculity_users  WHERE experience = '0' OR salary = '0' OR university = '' OR job_function = '0'
-        ) AS total_incomplete_faculty_users,
+        (SELECT COUNT(*) FROM faculity_users  WHERE experience = '0' OR salary = '0' OR university = '' OR job_function = '0') AS total_incomplete_faculty_users,
         (SELECT COUNT(*) FROM block_request  JOIN faculity_users ON faculity_users.faculityID = block_request.user_id) AS total_blocked_faculty_users
     `);
 
@@ -128,7 +132,8 @@ exports.userChart = async (req, res) => {
   }
 };
 
-exports.jobChart = async (req, res) => {
+// Job chart data
+export const jobChart = async (req, res) => {
   try {
     const results = await runQuery(`
       SELECT 
@@ -148,7 +153,8 @@ exports.jobChart = async (req, res) => {
   }
 };
 
-exports.employerJobChart = async (req, res) => {
+// Employer job chart with filter
+export const employerJobChart = async (req, res) => {
   try {
     const { filter } = req.query;
     let query = "";
@@ -156,44 +162,42 @@ exports.employerJobChart = async (req, res) => {
     switch (filter) {
       case "day":
         query = `
-    SELECT DATE_FORMAT(e.created_at, '%e %b') AS time,
-           COUNT(DISTINCT e.employerID) AS employers,
-           COUNT(DISTINCT j.jobID) AS jobs
-    FROM employer_user e
-    LEFT JOIN jobs j ON e.employerID = j.employerID
-    WHERE e.created_at >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
-      AND e.created_at <= CURDATE()
-    GROUP BY DATE(e.created_at)
-    ORDER BY DATE(e.created_at)
-  `;
+          SELECT DATE_FORMAT(e.created_at, '%e %b') AS time,
+                 COUNT(DISTINCT e.employerID) AS employers,
+                 COUNT(DISTINCT j.jobID) AS jobs
+          FROM employer_user e
+          LEFT JOIN jobs j ON e.employerID = j.employerID
+          WHERE e.created_at >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
+            AND e.created_at <= CURDATE()
+          GROUP BY DATE(e.created_at)
+          ORDER BY DATE(e.created_at)
+        `;
         break;
       case "week":
         query = `
-    SELECT DATE_FORMAT(e.created_at, '%a %e %b') AS time,
-           COUNT(DISTINCT e.employerID) AS employers,
-           COUNT(DISTINCT j.jobID) AS jobs
-    FROM employer_user e
-    LEFT JOIN jobs j ON e.employerID = j.employerID
-    WHERE e.created_at >= DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE())) DAY)
-      AND e.created_at < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE())) DAY), INTERVAL 7 DAY)
-    GROUP BY DATE(e.created_at)
-    ORDER BY DATE(e.created_at)
-  `;
+          SELECT DATE_FORMAT(e.created_at, '%a %e %b') AS time,
+                 COUNT(DISTINCT e.employerID) AS employers,
+                 COUNT(DISTINCT j.jobID) AS jobs
+          FROM employer_user e
+          LEFT JOIN jobs j ON e.employerID = j.employerID
+          WHERE e.created_at >= DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE())) DAY)
+            AND e.created_at < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE())) DAY), INTERVAL 7 DAY)
+          GROUP BY DATE(e.created_at)
+          ORDER BY DATE(e.created_at)
+        `;
         break;
-
       case "month":
         query = `
-    SELECT DATE_FORMAT(e.created_at, '%b %Y') AS time,
-           COUNT(DISTINCT e.employerID) AS employers,
-           COUNT(DISTINCT j.jobID) AS jobs
-    FROM employer_user e
-    LEFT JOIN jobs j ON e.employerID = j.employerID
-    WHERE YEAR(e.created_at) = YEAR(CURDATE())
-    GROUP BY YEAR(e.created_at), MONTH(e.created_at)
-    ORDER BY YEAR(e.created_at), MONTH(e.created_at)
-  `;
+          SELECT DATE_FORMAT(e.created_at, '%b %Y') AS time,
+                 COUNT(DISTINCT e.employerID) AS employers,
+                 COUNT(DISTINCT j.jobID) AS jobs
+          FROM employer_user e
+          LEFT JOIN jobs j ON e.employerID = j.employerID
+          WHERE YEAR(e.created_at) = YEAR(CURDATE())
+          GROUP BY YEAR(e.created_at), MONTH(e.created_at)
+          ORDER BY YEAR(e.created_at), MONTH(e.created_at)
+        `;
         break;
-
       case "year":
         query = `
           SELECT YEAR(e.created_at) AS time,
@@ -206,7 +210,6 @@ exports.employerJobChart = async (req, res) => {
           ORDER BY YEAR(e.created_at)
         `;
         break;
-
       default:
         return sendError(res, "Invalid filter", 400);
     }
